@@ -39,20 +39,29 @@ def searchCompany(browser,search_content):
 def jumpIntoCompany(current_handle,handles,new_handle,browser,search_content):
     href = browser.find_element_by_xpath("//div/label/a/span[contains(text(), %s)]" % search_content)
     href.click()
+    time.sleep(0.5)
     switch_page(current_handle,handles,new_handle,browser)
 
 def jumpIntoSeniorExecutive(current_handle,handles,new_handle,browser):
     seniorExecutive = browser.find_element_by_xpath("//li/a[contains(text(),'公司高管')]")
     seniorExecutive.click()
+    time.sleep(0.5)
     switch_page(current_handle,handles,new_handle,browser)
 
 def jumpIntoResume(current_handle,handles,new_handle,browser,seniorExecutive_name):
     hreflists = browser.find_elements_by_tag_name('a')
+    found = False
     for href in hreflists:
         if href.text == seniorExecutive_name:
+            found = True
             href.click()
+            time.sleep(0.5)
             break
-    switch_page(current_handle,handles,new_handle,browser)
+    if not found:
+        return False
+    else:
+        switch_page(current_handle,handles,new_handle,browser)
+        return True
 
 def spiderInfo(browser,search_content,seniorExecutive_name, row, col):
     education = browser.find_element_by_xpath("//table[@id='Table1']/tbody/tr[1]/td[4]/div")
@@ -70,8 +79,10 @@ def spider(search_content, seniorExecutive_name, row, col):
     switch_page(current_handle,handles,new_handle,browser)
     jumpIntoCompany(current_handle,handles,new_handle,browser,search_content)
     jumpIntoSeniorExecutive(current_handle,handles,new_handle,browser)
-    jumpIntoResume(current_handle,handles,new_handle,browser,seniorExecutive_name)
-    spiderInfo(browser,search_content,seniorExecutive_name, row, col)
+    if jumpIntoResume(current_handle,handles,new_handle,browser,seniorExecutive_name):
+        spiderInfo(browser,search_content,seniorExecutive_name, row, col)
+    else:
+        writeIntoXlsx('','',search_content,seniorExecutive_name,row,col)
     browser.quit()
 
 
